@@ -1,0 +1,315 @@
+
+
+<!doctype html>
+
+<html>
+
+<head>
+
+    <script src="http://cdn.jsdelivr.net/bluebird/3.4.7/bluebird.js"></script>
+
+</head>
+
+<body>
+
+<script>
+
+    promiseAll()
+
+    .then(function() {
+
+        return promiseThen();
+
+    })
+
+    .then(function() {
+
+        return asyncException();
+
+    })
+
+    .then(function() {
+
+        return promiseTry();
+
+    })
+
+    .then(function() {
+
+        return promiseResolve();
+
+    })
+
+    .then(function() {
+
+        return asyncRecursion();
+
+    });
+
+ 
+
+    //wait for multiple promises to complete (data is array of objects returned from 3 async functions)
+
+    function promiseAll() {
+
+        return Promise.all([async1(), async2(), async3()])
+
+        .then(function (data) {
+
+            console.log(data);
+
+            console.log('---finished promiseAll');
+
+            console.log('');
+
+        });
+
+    }
+
+ 
+
+    //execute asynchronous functions sequentially
+
+    function promiseThen() {
+
+        return async1()
+
+        .then(function (data1) {
+
+            console.log(data1, 'async 1 promiseThen');
+
+            return async2();
+
+        })
+
+        .then(function (data2) {
+
+            console.log(data2, 'async 2 promiseThen');
+
+            return async3();
+
+        })
+
+        .then(function (data3) {
+
+            console.log(data3, 'async 3 promiseThen');
+
+            console.log('---finished promiseThen');
+
+            console.log('');
+
+        });
+
+    }
+
+ 
+
+    //catch an error that occurred in asynchronous function
+
+    function asyncException() {
+
+        return _asyncException()
+
+        .catch(function (e) {
+
+            console.log('async error in catch block: ' + e.name + ' - msg: ' + e.message);
+
+        })
+
+        .finally(function () {
+
+            console.log('finally is called regardless of promise\'s fate');
+
+            console.log('---finished asyncException');
+
+            console.log('');
+
+        });
+
+ 
+
+        function _asyncException() {
+
+            return new Promise(function (resolve, reject) {
+
+                setTimeout(function () {
+
+                    try {
+
+                        throw new Error('asynchronous error!')
+
+                    } catch (e) {
+
+                        reject(e);
+
+                    }
+
+                },
+
+                1000);
+
+            });
+
+        }
+
+    }
+
+ 
+
+    //synchronous exceptions turned into rejections on returned promise
+
+    function promiseTry() {
+
+        return _promiseTry()
+
+        .catch(function (e) {
+
+            console.log('synchronous error in catch block: ' + e.name + ' - msg: ' + e.message);
+
+        })
+
+        .finally(function () {
+
+            console.log('---finished promiseTry');
+
+            console.log('');
+
+        });
+
+ 
+
+        function _promiseTry() {
+
+            return Promise.try(function () {
+
+                throw new Error('synchronous error!');
+
+            });
+
+        }
+
+    }
+
+ 
+
+    //non thenable value returned as resolved promise
+
+    function promiseResolve() {
+
+        return _promiseResolve()
+
+        .then(function (data) {
+
+            console.log(data);
+
+            console.log('---finished promiseResolve');
+
+            console.log('');
+
+        });
+
+ 
+
+        function _promiseResolve() {
+
+            return Promise.resolve('Promise.resolve return non thenable value as resolved promise');
+
+        }
+
+    }
+
+ 
+
+    // asyncronous recursion
+
+    function asyncRecursion() {
+
+        return _asyncRecursion(10)
+
+        .then(function () {
+
+            console.log('---finished asyncRecursion');
+
+            console.log('');
+
+        });
+
+ 
+
+        function _asyncRecursion(times) {
+
+            console.log('asyncRecursion - times = ', times);
+
+ 
+
+            return new Promise(function (resolve, reject) {
+
+                if (times--) {
+
+                    setTimeout(function () {
+
+                        _asyncRecursion(times)
+
+                        .then(function () {
+
+                            resolve();
+
+                        });
+
+                    }, 1000);
+
+                } else {
+
+                    resolve();
+
+                }
+
+            });
+
+        }
+
+    }
+
+ 
+
+    function async1() {
+
+        return new Promise(function (resolve, reject) {
+
+            setTimeout(function () { resolve({ message: 'async1 is done', timestamp: Date() }); }, 1000);
+
+        });
+
+    }
+
+ 
+
+    function async2() {
+
+        return new Promise(function (resolve, reject) {
+
+            setTimeout(function () { resolve({ message: 'async2 is done', timestamp: Date() }); }, 1000);
+
+        });
+
+    }
+
+ 
+
+    function async3() {
+
+        return new Promise(function (resolve, reject) {
+
+            setTimeout(function () { resolve({ message: 'async3 is done', timestamp: Date() }); }, 1000);
+
+        });
+
+    }
+
+ 
+
+</script>
+
+</body>
+
+</html>
